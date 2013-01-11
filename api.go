@@ -11,7 +11,7 @@ import (
 
 // TODO better error handling
 
-const apiaddr = "http://tcrf.net/api.php"
+var apiaddr string
 
 const queryMIME = "application/x-www-form-urlencoded"
 

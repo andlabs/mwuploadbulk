@@ -70,7 +70,8 @@ func login(username string, password string) {
 }
 
 func logout() {
-	post("logout", "json", queryMIME)
+	// does not return any error code or other values
+	post("logout", "json", queryMIME).Body.Close()
 }
 
 /*
