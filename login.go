@@ -26,7 +26,7 @@ func login(username string, password string) {
 	}
 
 	// step 1
-	resp := post("login",
+	resp := post("login", queryMIME,
 		"lgname", username,
 		"lgpassword", password)
 	d := json.NewDecoder(resp.Body)
@@ -53,7 +53,7 @@ func login(username string, password string) {
 	}
 
 	// step 2
-	resp = post("login",
+	resp = post("login", queryMIME,
 		"lgname", username,
 		"lgpassword", password,
 		"lgtoken", result.R.Token)
@@ -70,7 +70,7 @@ func login(username string, password string) {
 }
 
 func logout() {
-	post("logout")
+	post("logout", queryMIME)
 }
 
 /*
