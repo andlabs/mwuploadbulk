@@ -4,8 +4,9 @@ package main
 import (
 	"net/http"
 	"net/url"
+	"io"
 	"strings"
-"io";"os";"fmt"
+//"os";"fmt"
 )
 
 // TODO better error handling
@@ -30,7 +31,7 @@ func buildQueryBody(action string, query ...string) io.Reader {
 	return strings.NewReader(v.Encode())
 }
 
-func post(action string, cookie *http.Cookie, query ...string) *http.Response {
+func post(action string, query ...string) *http.Response {
 	if len(query) % 2 == 1 {
 		panic("query sent to post not set of key/value pairs (odd number of arguments)")
 	}
@@ -38,8 +39,8 @@ func post(action string, cookie *http.Cookie, query ...string) *http.Response {
 	if err != nil {
 		panic(err)
 	}
-	if cookie != nil {
-		req.AddCookie(cookie)
+	if loginCookie != nil {
+		req.AddCookie(loginCookie)
 	}
 	req.Header.Set("Content-Type", queryMIME)
 	resp, err := http.DefaultClient.Do(req)
@@ -49,6 +50,7 @@ func post(action string, cookie *http.Cookie, query ...string) *http.Response {
 	return resp
 }
 
+/*
 func main() {
 	resp := post("login", nil,
 		"lgname", "Andlabs",
@@ -67,3 +69,4 @@ func main() {
 	io.Copy(os.Stdout, resp.Body)
 	fmt.Println()
 }
+*/
