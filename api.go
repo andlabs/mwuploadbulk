@@ -12,13 +12,12 @@ import (
 // TODO better error handling
 
 const apiaddr = "http://tcrf.net/api.php"
-const format = "json"
 
 const queryMIME = "application/x-www-form-urlencoded"
 
 // [22:46] <kevlar> see the implementation of PostForm for how you need to encode and set the POST body.
 // which just posts the encoded queries with MIME type queryMIME
-func buildQueryBody(action string, query ...string) io.Reader {
+func buildQueryBody(action string, format string, query ...string) io.Reader {
 	if len(query) % 2 == 1 {
 		panic("odd number of arguments passed to buildQueryBody")
 	}
@@ -31,11 +30,11 @@ func buildQueryBody(action string, query ...string) io.Reader {
 	return strings.NewReader(v.Encode())
 }
 
-func post(action string, MIMEtype string, query ...string) *http.Response {
+func post(action string, format string, MIMEtype string, query ...string) *http.Response {
 	if len(query) % 2 == 1 {
 		panic("query sent to post not set of key/value pairs (odd number of arguments)")
 	}
-	req, err := http.NewRequest("POST", apiaddr, buildQueryBody(action, query...))
+	req, err := http.NewRequest("POST", apiaddr, buildQueryBody(action, format, query...))
 	if err != nil {
 		panic(err)
 	}
