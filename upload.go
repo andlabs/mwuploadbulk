@@ -3,6 +3,11 @@ package main
 
 import (
 	"encoding/xml"
+	"encoding/json"
+	"io/ioutil"
+	"crypto/sha1"
+	"path/filepath"
+"fmt"
 )
 
 // I would use JSON for this but MediaWiki does the following:
@@ -22,7 +27,7 @@ func getEditToken(filename string) string {
 	resp := post("query", "xml", queryMIME,
 		"prop", "info",
 		"intoken", "edit",
-		"titles", filename)
+		"titles", "File:" + filename)
 	defer resp.Body.Close()
 	d := xml.NewDecoder(resp.Body)
 	err := d.Decode(&result)
@@ -33,4 +38,43 @@ func getEditToken(filename string) string {
 		panic("zero pages or more than one page returned when getting edit token")
 	}
 	return result.P[0].EditToken
+}
+
+type uploadResult struct {
+	// ...
+}
+
+const uploadMIME = "multipart/form-data"
+
+func upload(filename string, editToken string) {
+	outname := filepath.Base(filename)
+	if outname == "" {
+		panic("filename not given to upload")
+	}
+	b, err := ioutil.ReadFile(filename)
+	if err != nil {
+		panic(err)
+	}
+	sum := sha1.New()
+	n, err := sum.Write(b)
+	if err != nil {
+		panic(err)
+	}
+	if n < len(b) {
+		panic("short write to SHA-1 sum without error")
+	}
+
+	resp := post_multipart("upload", "json",
+		"filename", outname,
+		"file", string(b),
+		"token", editToken)
+	defer resp.Body.Close()
+/*	d := json.NewDecoder(resp.Body)
+	err = d.Decode(&result)
+	if err != nil {
+		panic(err)
+	}
+*/	_=json.NewDecoder
+	b,err=ioutil.ReadAll(resp.Body)
+	fmt.Printf("%v %s\n", err, b)
 }

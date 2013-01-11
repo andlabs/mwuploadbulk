@@ -6,7 +6,10 @@ import (
 	"net/url"
 	"io"
 	"strings"
+	"mime/multipart"
+	"bytes"
 //"os";"fmt"
+"fmt"
 )
 
 // TODO better error handling
@@ -30,11 +33,33 @@ func buildQueryBody(action string, format string, query ...string) io.Reader {
 	return strings.NewReader(v.Encode())
 }
 
-func post(action string, format string, MIMEtype string, query ...string) *http.Response {
+func buildMultipartBody(action string, format string, query ...string) (MIMEtype string, r io.Reader) {
 	if len(query) % 2 == 1 {
-		panic("query sent to post not set of key/value pairs (odd number of arguments)")
+		panic("odd number of arguments passed to buildQueryBody")
 	}
-	req, err := http.NewRequest("POST", apiaddr, buildQueryBody(action, format, query...))
+	b := new(bytes.Buffer)
+	v := multipart.NewWriter(b)
+	err := v.WriteField("format", format)
+	if err != nil {
+		panic(err)
+	}
+	err = v.WriteField("action", action)
+	if err != nil {
+		panic(err)
+	}
+	for i := 0; i < len(query); i += 2 {
+		err = v.WriteField(query[i], query[i + 1])
+		if err != nil {
+			panic(err)
+		}
+	}
+	v.Close()
+fmt.Println(b)
+	return v.FormDataContentType(), b
+}
+
+func dopost(MIMEtype string, r io.Reader) *http.Response {
+	req, err := http.NewRequest("POST", apiaddr, r)
 	if err != nil {
 		panic(err)
 	}
@@ -47,6 +72,16 @@ func post(action string, format string, MIMEtype string, query ...string) *http.
 		panic(err)
 	}
 	return resp
+}
+
+// TODO abstract MIMEtype away from here
+
+func post(action string, format string, MIMEtype string, query ...string) *http.Response {
+	return dopost(MIMEtype, buildQueryBody(action, format, query...))
+}
+
+func post_multipart(action string, format string, query...string) *http.Response {
+	return dopost(buildMultipartBody(action, format, query...))
 }
 
 /*
