@@ -7,7 +7,8 @@ import (
 	"io/ioutil"
 	"crypto/sha1"
 	"path/filepath"
-"fmt"
+	"encoding/hex"
+	"bytes"
 )
 
 // I would use JSON for this but MediaWiki does the following:
@@ -41,7 +42,10 @@ func getEditToken(filename string) string {
 }
 
 type uploadResult struct {
-	// ...
+	Result		string	`json:"result"`
+	ImageInfo	struct {
+		SHA1	string	`json:"sha1"`
+	}	`json:"imageinfo"`
 }
 
 const uploadMIME = "multipart/form-data"
@@ -64,16 +68,28 @@ func upload(filename string, editToken string) {
 		panic("short write to SHA-1 sum without error")
 	}
 
+	var result struct {
+		R	uploadResult	`json:"upload"`
+	}
+
 	resp := post_multipart("upload", "json", b,
 		"filename", outname,
-		"token", editToken)
+		"token", editToken,
+		"ignorewarnings", "")		// TODO make it an option
 	defer resp.Body.Close()
-/*	d := json.NewDecoder(resp.Body)
+	d := json.NewDecoder(resp.Body)
 	err = d.Decode(&result)
 	if err != nil {
 		panic(err)
 	}
-*/	_=json.NewDecoder
-	b,err=ioutil.ReadAll(resp.Body)
-	fmt.Printf("%v %s\n", err, b)
+	if result.R.Result != "Success" {
+		panic("received error " + result.R.Result + " during upload")
+	}
+	tosha1, err := hex.DecodeString(result.R.ImageInfo.SHA1)
+	if err != nil {
+		panic(err)
+	}
+	if !bytes.Equal(tosha1, sum.Sum(nil)) {
+		panic("SHA-1 mismatch")
+	}
 }
