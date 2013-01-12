@@ -64,9 +64,8 @@ func upload(filename string, editToken string) {
 		panic("short write to SHA-1 sum without error")
 	}
 
-	resp := post_multipart("upload", "json",
+	resp := post_multipart("upload", "json", b,
 		"filename", outname,
-		"file", string(b),
 		"token", editToken)
 	defer resp.Body.Close()
 /*	d := json.NewDecoder(resp.Body)

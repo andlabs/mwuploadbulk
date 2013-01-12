@@ -9,7 +9,6 @@ import (
 	"mime/multipart"
 	"bytes"
 //"os";"fmt"
-"fmt"
 )
 
 // TODO better error handling
@@ -33,7 +32,7 @@ func buildQueryBody(action string, format string, query ...string) io.Reader {
 	return strings.NewReader(v.Encode())
 }
 
-func buildMultipartBody(action string, format string, query ...string) (MIMEtype string, r io.Reader) {
+func buildMultipartBody(action string, format string, filecontents []byte, query ...string) (MIMEtype string, r io.Reader) {
 	if len(query) % 2 == 1 {
 		panic("odd number of arguments passed to buildQueryBody")
 	}
@@ -47,14 +46,30 @@ func buildMultipartBody(action string, format string, query ...string) (MIMEtype
 	if err != nil {
 		panic(err)
 	}
+	filename := ""
 	for i := 0; i < len(query); i += 2 {
 		err = v.WriteField(query[i], query[i + 1])
 		if err != nil {
 			panic(err)
 		}
+		if query[i] == "filename" {
+			filename = query[i + 1]
+		}
+	}
+	if filename == "" {
+		panic("filename not provided")
+	}
+	fw, err := v.CreateFormFile("file", filename)
+	if err != nil {
+		panic(err)
+	}
+	n, err := fw.Write(filecontents)
+	if err != nil {
+		panic(err)
+	} else if n < len(filecontents) {
+		panic("short writte shoving in file but no error returned")
 	}
 	v.Close()
-fmt.Println(b)
 	return v.FormDataContentType(), b
 }
 
@@ -80,8 +95,8 @@ func post(action string, format string, MIMEtype string, query ...string) *http.
 	return dopost(MIMEtype, buildQueryBody(action, format, query...))
 }
 
-func post_multipart(action string, format string, query...string) *http.Response {
-	return dopost(buildMultipartBody(action, format, query...))
+func post_multipart(action string, format string, filecontents []byte, query...string) *http.Response {
+	return dopost(buildMultipartBody(action, format, filecontents, query...))
 }
 
 /*
