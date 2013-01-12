@@ -50,7 +50,7 @@ type uploadResult struct {
 
 const uploadMIME = "multipart/form-data"
 
-func upload(filename string, editToken string) {
+func upload(filename string, description string, editToken string) {
 	outname := filepath.Base(filename)
 	if outname == "" {
 		panic("filename not given to upload")
@@ -75,6 +75,7 @@ func upload(filename string, editToken string) {
 	resp := post_multipart("upload", "json", b,
 		"filename", outname,
 		"token", editToken,
+		"text", description,
 		"ignorewarnings", "")		// TODO make it an option
 	defer resp.Body.Close()
 	d := json.NewDecoder(resp.Body)
@@ -92,4 +93,5 @@ func upload(filename string, editToken string) {
 	if !bytes.Equal(tosha1, sum.Sum(nil)) {
 		panic("SHA-1 mismatch")
 	}
+	// TODO check if description sent successfully
 }
