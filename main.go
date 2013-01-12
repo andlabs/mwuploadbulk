@@ -10,7 +10,10 @@ import (
 	"io/ioutil"
 )
 
-// general TODOs: better error handling all around; glob support
+// general TODOs:
+// - better error handling all around
+// - glob support
+// - delay between files
 
 var description string
 var startingPath string
