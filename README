@@ -8,4 +8,4 @@ You will be asked for your wiki credentials and the file's description after the
 
 This is go get-table; the only outside library used is http://code.google.com/p/gopass/ for the password prompt.
 
-This is unpolished code by far; it should probably be rewritten... Still, bugs and comments welcome.
+This is unpolished code by far; it should probably be rewritten... Still, bug reports and comments welcome.
