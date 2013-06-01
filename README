@@ -1,0 +1,11 @@
+This program uses the MediaWiki API to upload a bunch of files to a wiki with the same description for each. Unlike similar tools, it only adds the description to the uploaded files; it does not do anything else (add other sections, set up a gallery, etc.).
+
+Usage:
+	mwuploadbulk APIurl files...
+It will not seek down into subdirectories, but will look inside directories listed on the command line.
+
+You will be asked for your wiki credentials and the file's description after the program starts.
+
+This is go get-table; the only outside library used is http://code.google.com/p/gopass/ for the password prompt.
+
+This is unpolished code by far; it should probably be rewritten... Still, bugs and comments welcome.
